@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.8
+# syntax=docker/dockerfile:1
 
 # This file is designed for production server deployment, not local development work
 # For a containerized local dev environment, see: https://github.com/mastodon/mastodon/blob/main/README.md#docker
@@ -7,8 +7,8 @@
 # the extended buildx capabilities used in this file.
 # Make sure multiarch TARGETPLATFORM is available for interpolation
 # See: https://docs.docker.com/build/building/multi-platform/
-ARG TARGETPLATFORM=${TARGETPLATFORM}
-ARG BUILDPLATFORM=${BUILDPLATFORM}
+#ARG TARGETPLATFORM=${TARGETPLATFORM}
+#ARG BUILDPLATFORM=${BUILDPLATFORM}
 
 # Ruby image to use for base image, change with [--build-arg RUBY_VERSION="3.3.x"]
 # renovate: datasource=docker depName=docker.io/ruby
@@ -74,9 +74,9 @@ ENV \
 # Set default shell used for running commands
 SHELL ["/bin/bash", "-o", "pipefail", "-o", "errexit", "-c"]
 
-ARG TARGETPLATFORM
+# ARG TARGETPLATFORM
 
-RUN echo "Target platform is $TARGETPLATFORM"
+# RUN echo "Target platform is $TARGETPLATFORM"
 
 RUN \
 # Remove automatic apt cache Docker cleanup scripts
@@ -115,8 +115,10 @@ RUN \
     patchelf \
   ;
 
-# Create temporary build layer from base image
+######
+# Create first temporary build layer from base image
 FROM ruby AS build
+######
 
 # Copy Node package configuration files into working directory
 COPY package.json yarn.lock .yarnrc.yml /opt/mastodon/
@@ -125,7 +127,7 @@ COPY .yarn /opt/mastodon/.yarn
 COPY --from=node /usr/local/bin /usr/local/bin
 COPY --from=node /usr/local/lib /usr/local/lib
 
-ARG TARGETPLATFORM
+# ARG TARGETPLATFORM
 
 # hadolint ignore=DL3008
 RUN \
@@ -180,8 +182,11 @@ RUN \
   corepack enable; \
   corepack prepare --activate;
 
+
+######
 # Create temporary libvips specific build layer from build layer
 FROM build AS libvips
+######
 
 # libvips version to compile, change with [--build-arg VIPS_VERSION="8.15.2"]
 # renovate: datasource=github-releases depName=libvips packageName=libvips/libvips
@@ -200,8 +205,11 @@ RUN \
   ninja; \
   ninja install;
 
+
+######
 # Create temporary ffmpeg specific build layer from build layer
 FROM build AS ffmpeg
+######
 
 # ffmpeg version to compile, change with [--build-arg FFMPEG_VERSION="7.0.x"]
 # renovate: datasource=repology depName=ffmpeg packageName=openpkg_current/ffmpeg
@@ -242,10 +250,12 @@ RUN \
   make -j$(nproc); \
   make install;
 
+######
 # Create temporary bundler specific build layer from build layer
 FROM build AS bundler
+######
 
-ARG TARGETPLATFORM
+# ARG TARGETPLATFORM
 
 # Copy Gemfile config into working directory
 COPY Gemfile* /opt/mastodon/
@@ -262,10 +272,12 @@ RUN \
 # Download and install required Gems
   bundle install -j"$(nproc)";
 
+######
 # Create temporary node specific build layer from build layer
 FROM build AS yarn
+######
 
-ARG TARGETPLATFORM
+# ARG TARGETPLATFORM
 
 # Copy Node package configuration files into working directory
 COPY package.json yarn.lock .yarnrc.yml /opt/mastodon/
@@ -277,11 +289,10 @@ RUN \
 # Install Node packages
   yarn workspaces focus --production @mastodon/mastodon;
 
+######
 # Create temporary assets build layer from build layer
 FROM build AS precompiler
-
-# Copy Mastodon sources into precompiler layer
-COPY . /opt/mastodon/
+######
 
 # Copy bundler and node packages from build layer to container
 COPY --from=yarn /opt/mastodon /opt/mastodon/
@@ -291,7 +302,10 @@ COPY --from=bundler /usr/local/bundle/ /usr/local/bundle/
 COPY --from=libvips /usr/local/libvips/bin /usr/local/bin
 COPY --from=libvips /usr/local/libvips/lib /usr/local/lib
 
-ARG TARGETPLATFORM
+# Copy Mastodon sources into precompiler layer
+COPY . /opt/mastodon/
+
+# ARG TARGETPLATFORM
 
 RUN \
   ldconfig; \
@@ -301,10 +315,12 @@ RUN \
 # Cleanup temporary files
   rm -fr /opt/mastodon/tmp;
 
+######
 # Prep final Mastodon Ruby layer
 FROM ruby AS mastodon
+######
 
-ARG TARGETPLATFORM
+# ARG TARGETPLATFORM
 
 # hadolint ignore=DL3008
 RUN \
@@ -347,9 +363,6 @@ RUN \
     libx265-199 \
   ;
 
-# Copy Mastodon sources into final layer
-COPY . /opt/mastodon/
-
 # Copy compiled assets to layer
 COPY --from=precompiler /opt/mastodon/public/packs /opt/mastodon/public/packs
 COPY --from=precompiler /opt/mastodon/public/assets /opt/mastodon/public/assets
@@ -362,6 +375,9 @@ COPY --from=libvips /usr/local/libvips/lib /usr/local/lib
 COPY --from=ffmpeg /usr/local/ffmpeg/bin /usr/local/bin
 COPY --from=ffmpeg /usr/local/ffmpeg/lib /usr/local/lib
 
+# Copy Mastodon sources into final layer
+COPY . /opt/mastodon/
+
 RUN \
   ldconfig; \
 # Smoketest media processors
@@ -373,6 +389,8 @@ RUN \
   # Precompile bootsnap code for faster Rails startup
   bundle exec bootsnap precompile --gemfile app/ lib/;
 
+# TODO: use COPY --chown in previous steps rather than manual chown here
+#       Ideally, USER is set way above so we don't need to chown at all
 RUN \
 # Pre-create and chown system volume to Mastodon user
   mkdir -p /opt/mastodon/public/system; \
@@ -386,3 +404,4 @@ USER mastodon
 EXPOSE 3000
 # Set container tini as default entry point
 ENTRYPOINT ["/usr/bin/tini", "--"]
+# TODO: add CMD here as default just incase someone isn't running compose
