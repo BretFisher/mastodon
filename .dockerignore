@@ -20,3 +20,13 @@ postgres14
 redis
 elasticsearch
 chart
+
+# avoiding non-container-image files
+depot.json
+README.md
+.vscode/
+Dockerfile*
+*compose*.yml
+*compose*.yaml
+CHANGELOG.md
+README.md
