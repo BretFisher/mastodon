@@ -28,7 +28,7 @@ jobs:
       ### tell docker where to push.
       ### NOTE if Docker Hub is set to true, you must set secrets above and also add account/repo/tags below
       dockerhub-enable: false
-      ghcr-enable: false
+      ghcr-enable: true
 
       ### REQUIRED
       ### A list of the account/repo names for docker build. List should match what's enabled above
