@@ -1,5 +1,5 @@
 ---
-name: Depot Build and Push
+name: Depot Build
 
 on:
   push:
@@ -31,4 +31,4 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: false
-          tags: ghcr.io/bretfisher/mastodon:latest
+          tags: ghcr.io/bretfisher/mastodon:depot-latest
