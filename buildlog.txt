@@ -1,0 +1,18 @@
+Initial dfc change build failure:
+
+ > [ruby 3/5] RUN rm -f /etc/apt/apt.conf.d/docker-clean ;     echo "Etc/UTC" > /etc/localtime ;     addgroup --gid "991" mastodon ;     adduser -l --uid "991" --ingroup "991" --home /opt/mastodon mastodon ;     ln -s /opt/mastodon /mastodon ;:
+0.255 /bin/bash: line 1: addgroup: command not found
+------
+Dockerfile:76
+--------------------
+  75 |
+  76 | >>> RUN rm -f /etc/apt/apt.conf.d/docker-clean ; \
+  77 | >>>     echo "${TZ}" > /etc/localtime ; \
+  78 | >>>     addgroup --gid "${GID}" mastodon ; \
+  79 | >>>     adduser -l --uid "${UID}" --ingroup "${GID}" --home /opt/mastodon mastodon ; \
+  80 | >>>     ln -s /opt/mastodon /mastodon ;
+  81 |
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/bash -o pipefail -o errexit -c rm -f /etc/apt/apt.conf.d/docker-clean ;     echo \"${TZ}\" > /etc/localtime ;     addgroup --gid \"${GID}\" mastodon ;     adduser -l --uid \"${UID}\" --ingroup \"${GID}\" --home /opt/mastodon mastodon ;     ln -s /opt/mastodon /mastodon ;" did not complete successfully: exit code: 127
+
+
