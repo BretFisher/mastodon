@@ -62,8 +62,8 @@ services:
 
   web:
     # You can uncomment the following line if you want to not use the prebuilt image, for example if you have local code changes
-    # build: .
-    image: ghcr.io/mastodon/mastodon:v4.4.4
+    build: .
+    image: ericsmalling/mastodon:latest
     restart: always
     env_file:
       - .env.production
@@ -107,8 +107,8 @@ services:
 
   sidekiq:
     # You can uncomment the following line if you want to not use the prebuilt image, for example if you have local code changes
-    # build: .
-    image: ghcr.io/mastodon/mastodon:v4.4.4
+    build: .
+    image: ericsmalling/mastodon:latest
     restart: always
     env_file:
       - .env.production
