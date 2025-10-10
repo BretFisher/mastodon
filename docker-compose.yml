@@ -4,7 +4,8 @@
 services:
   db:
     restart: always
-    image: postgres:14-alpine
+    #image: postgres:14-alpine
+    image: cgr.dev/chainguard/postgres:latest
     shm_size: 256mb
     networks:
       - internal_network
@@ -19,7 +20,8 @@ services:
 
   redis:
     restart: always
-    image: redis:7-alpine
+#    image: redis:7-alpine
+    image: cgr.dev/chainguard/redis:latest
     networks:
       - internal_network
     healthcheck:
