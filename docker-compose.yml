@@ -20,7 +20,7 @@ services:
 
   redis:
     restart: always
-#    image: redis:7-alpine
+    #    image: redis:7-alpine
     image: cgr.dev/chainguard/redis:latest
     networks:
       - internal_network
