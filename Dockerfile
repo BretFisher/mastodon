@@ -9,20 +9,18 @@
 # See: https://docs.docker.com/build/building/multi-platform/
 ARG TARGETPLATFORM=${TARGETPLATFORM}
 ARG BUILDPLATFORM=${BUILDPLATFORM}
-ARG BASE_REGISTRY="docker.io"
+ARG BASE_REGISTRY="cgr.dev/chainguard"
 
 # Ruby image to use for base image, change with [--build-arg RUBY_VERSION="3.4.x"]
 # renovate: datasource=docker depName=docker.io/ruby
-ARG RUBY_VERSION="3.4.7"
+ARG RUBY_VERSION="latest"
 # # Node.js version to use in base image, change with [--build-arg NODE_MAJOR_VERSION="20"]
 # renovate: datasource=node-version depName=node
-ARG NODE_MAJOR_VERSION="22"
-# Debian image to use for base image, change with [--build-arg DEBIAN_VERSION="trixie"]
-ARG DEBIAN_VERSION="trixie"
+ARG NODE_MAJOR_VERSION="latest"
 # Node.js image to use for base image based on combined variables (ex: 20-trixie-slim)
-FROM ${BASE_REGISTRY}/node:${NODE_MAJOR_VERSION}-${DEBIAN_VERSION}-slim AS node
+FROM ${BASE_REGISTRY}/node:${NODE_MAJOR_VERSION} AS node
 # Ruby image to use for base image based on combined variables (ex: 3.4.x-slim-trixie)
-FROM ${BASE_REGISTRY}/ruby:${RUBY_VERSION}-slim-${DEBIAN_VERSION} AS ruby
+FROM ${BASE_REGISTRY}/ruby:${RUBY_VERSION} AS ruby
 USER root
 
 # Resulting version string is vX.X.X-MASTODON_VERSION_PRERELEASE+MASTODON_VERSION_METADATA

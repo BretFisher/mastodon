@@ -15,4 +15,20 @@ Dockerfile:76
 --------------------
 ERROR: failed to build: failed to solve: process "/bin/bash -o pipefail -o errexit -c rm -f /etc/apt/apt.conf.d/docker-clean ;     echo \"${TZ}\" > /etc/localtime ;     addgroup --gid \"${GID}\" mastodon ;     adduser -l --uid \"${UID}\" --ingroup \"${GID}\" --home /opt/mastodon mastodon ;     ln -s /opt/mastodon /mastodon ;" did not complete successfully: exit code: 127
 
+---
+Fixed ruby and node FROM lines
+
+ => ERROR [precompiler  2/10] COPY --from=node /usr/local/bin /usr/local/bin                                                                                                     0.0s
+------
+ > [precompiler  2/10] COPY --from=node /usr/local/bin /usr/local/bin:
+------
+Dockerfile:188
+--------------------
+ 186 |
+ 187 |     # Copy Node.js binaries/libraries into layer
+ 188 | >>> COPY --from=node /usr/local/bin /usr/local/bin
+ 189 |     COPY --from=node /usr/local/lib /usr/local/lib
+ 190 |
+--------------------
+ERROR: failed to build: failed to solve: failed to compute cache key: failed to calculate checksum of ref ab3f4bb4-7696-4c08-b3e1-2c6af00e0ae4::2lngnybs7x7ubfce3457fncrg: "/usr/local/bin": not found
 
