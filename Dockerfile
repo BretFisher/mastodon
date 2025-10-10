@@ -225,11 +225,11 @@ RUN apk add --no-cache \
   expat \
   glib \
   icu \
-  libidn2 \
+  libidn \
   libpq \
   readline \
   openssl \
-  yaml
+  yaml 
     # patchelf --add-needed libjemalloc.so.2 /usr/local/bin/ruby
 # RUN apk add --no-cache dav1d libexif expat glib libheif highway icu libidn2 libimagequant libjpeg-turbo lcms2 lame opus libpq readline snappy openssl libtheora tiff libvorbis libvorbis libvorbis libwebp libwebp libwebp x264 x265 yaml ruby3.4-bundler
 # RUN apk add --no-cache libcgif0 libdav1d7 libexif12 libexpat1 libglib2.0-0t64 libheif1 libhwy1t64 libicu76 libidn12 libimagequant0 libjpeg62-turbo liblcms2-2 libmp3lame0 libopencore-amrnb0 libopencore-amrwb0 libopus0 libpq libreadline8t64 libsnappy1v5 libspng0 libssl3t64 libtheora0 libtiff6 libvorbis0a libvorbisenc2 libvorbisfile3 libvpx9 libwebp7 libwebpdemux2 libwebpmux3 libx264-164 libx265-215 libyaml-0-2
