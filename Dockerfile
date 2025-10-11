@@ -5,6 +5,40 @@ ARG BUILDPLATFORM=${BUILDPLATFORM}
 
 FROM cgr.dev/chainguard/ruby:latest AS ruby-prod
 
+ARG MASTODON_VERSION_PRERELEASE=""
+ARG MASTODON_VERSION_METADATA=""
+ARG SOURCE_COMMIT=""
+
+ARG RAILS_SERVE_STATIC_FILES="true"
+ARG RUBY_YJIT_ENABLE="1"
+ARG TZ="Etc/UTC"
+
+# Apply Mastodon build options based on options above
+ENV \
+  MASTODON_VERSION_PRERELEASE="${MASTODON_VERSION_PRERELEASE}" \
+  MASTODON_VERSION_METADATA="${MASTODON_VERSION_METADATA}" \
+  SOURCE_COMMIT="${SOURCE_COMMIT}" \
+  RAILS_SERVE_STATIC_FILES=${RAILS_SERVE_STATIC_FILES} \
+  RUBY_YJIT_ENABLE=${RUBY_YJIT_ENABLE} \
+  TZ=${TZ}
+
+ENV \
+  BIND="0.0.0.0" \
+  NODE_ENV="production" \
+  RAILS_ENV="production" \
+  DEBIAN_FRONTEND="noninteractive" \
+  PATH="${PATH}:/opt/ruby/bin:/opt/mastodon/bin:/usr/local/bundle/bin" \
+  MALLOC_CONF="narenas:2,background_thread:true,thp:never,dirty_decay_ms:1000,muzzy_decay_ms:0" \
+  MASTODON_USE_LIBVIPS=true \
+  MASTODON_SIDEKIQ_READY_FILENAME=sidekiq_process_has_started_and_will_begin_processing_jobs \
+  GEM_HOME="/usr/local/bundle"
+  
+
+# Set default shell used for running commands
+SHELL ["/bin/bash", "-o", "pipefail", "-o", "errexit", "-c"]
+
+ARG TARGETPLATFORM
+
 FROM cgr.dev/chainguard/ruby:latest-dev AS ruby-dev
 USER root
 
@@ -176,6 +210,7 @@ COPY --from=ruby-prod / /base-chroot
 RUN apk add --no-script --no-commit-hooks --no-cache --root /base-chroot bash-binsh
 RUN apk add --no-cache --root /base-chroot \
   expat \
+  busybox \
   glib \
   icu \
   libidn \
@@ -184,14 +219,16 @@ RUN apk add --no-cache --root /base-chroot \
   openssl \
   yaml \
   ffmpeg \
-  libvips
+  libvips \
+  ruby3.4-rails \
+  tini
 
 # Smoketest media processors
 RUN chroot /base-chroot vips -v; \
     chroot /base-chroot ffmpeg -version; \
     chroot /base-chroot ffprobe -version;
 
-RUN apk del --no-script --no-commit-hooks --no- --root /base-chroot bash-binsh
+# RUN apk del --no-script --no-commit-hooks --no- --root /base-chroot bash-binsh
 
 # Copy Mastodon sources for final layer
 COPY . /opt/mastodon/
@@ -213,9 +250,14 @@ RUN ldconfig
 
 
 FROM ruby-prod AS mastodon
-ARG TARGETPLATFORM
 COPY --from=mastodon-prep /base-chroot /
-COPY --from=mastodon-prep /opt/mastodon /opt/mastodon
+
+COPY --from=ruby-dev /etc/localtime /etc/localtime
+COPY --from=ruby-dev /etc/passwd /etc/passwd
+COPY --from=ruby-dev /etc/group /etc/group
+COPY --from=ruby-dev /etc/shadow /etc/shadow
+
+COPY --from=mastodon-prep --chown=mastodon:mastodon /opt/mastodon /opt/mastodon
 
 # Copy compiled assets to layer
 COPY --from=precompiler /opt/mastodon/public/packs /opt/mastodon/public/packs
@@ -226,6 +268,9 @@ COPY --from=bundler /opt/mastodon/.bundle/config /opt/mastodon/.bundle/config
 
 # Set the running user for resulting container
 USER mastodon
+
+WORKDIR /opt/mastodon
+
 # Expose default Puma ports
 EXPOSE 3000
 # Set container tini as default entry point
