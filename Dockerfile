@@ -210,7 +210,6 @@ COPY --from=ruby-prod / /base-chroot
 RUN apk add --no-script --no-commit-hooks --no-cache --root /base-chroot bash-binsh
 RUN apk add --no-cache --root /base-chroot \
   expat \
-  busybox \
   glib \
   icu \
   libidn \
@@ -228,7 +227,7 @@ RUN chroot /base-chroot vips -v; \
     chroot /base-chroot ffmpeg -version; \
     chroot /base-chroot ffprobe -version;
 
-# RUN apk del --no-script --no-commit-hooks --no- --root /base-chroot bash-binsh
+RUN apk del --no-script --no-commit-hooks --no- --root /base-chroot bash-binsh
 
 # Copy Mastodon sources for final layer
 COPY . /opt/mastodon/
