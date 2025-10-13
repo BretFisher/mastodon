@@ -209,8 +209,6 @@ FROM ruby-dev AS mastodon-prep
 COPY --from=ruby-prod / /base-chroot
 RUN apk add --no-script --no-commit-hooks --no-cache --root /base-chroot bash-binsh
 RUN apk add --no-cache --root /base-chroot \
-  expat \
-  glib \
   icu \
   libidn \
   libpq \
@@ -219,7 +217,7 @@ RUN apk add --no-cache --root /base-chroot \
   yaml \
   ffmpeg \
   libvips \
-  ruby3.4-rails \
+  ruby3.4-bundler \
   tini
 
 # Smoketest media processors
