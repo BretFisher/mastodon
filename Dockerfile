@@ -227,6 +227,14 @@ RUN chroot /base-chroot vips -v; \
 
 RUN apk del --no-script --no-commit-hooks --no-cache --root /base-chroot bash-binsh
 
+# Remove unneeded files from base-chroot to reduce image size
+RUN rm -rf /base-chroot/usr/share/doc/* \
+           /base-chroot/usr/share/man/* \
+           /base-chroot/usr/lib/*.a \
+           /base-chroot/usr/include/* \
+           /base-chroot/usr/lib/perl5 \
+           /base-chroot/usr/share/perl5
+
 # Copy Mastodon sources for final layer
 COPY . /opt/mastodon/
 RUN \
@@ -242,7 +250,6 @@ COPY --from=precompiler /opt/mastodon/public/assets /opt/mastodon/public/assets
 COPY --from=bundler /usr/local/bundle/ /usr/local/bundle/
 COPY --from=bundler /opt/mastodon/.bundle/config /opt/mastodon/.bundle/config
 
-RUN bundle exec bootsnap precompile --gemfile app/ lib/
 RUN ldconfig
 
 
@@ -262,6 +269,9 @@ COPY --from=precompiler /opt/mastodon/public/assets /opt/mastodon/public/assets
 # Copy bundler components to layer
 COPY --from=bundler /usr/local/bundle/ /usr/local/bundle/
 COPY --from=bundler /opt/mastodon/.bundle/config /opt/mastodon/.bundle/config
+
+# Precompile bootsnap code for faster Rails startup
+RUN bundle exec bootsnap precompile --gemfile app/ lib/
 
 # Set the running user for resulting container
 USER mastodon
