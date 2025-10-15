@@ -227,6 +227,26 @@ RUN chroot /base-chroot vips -v; \
 
 RUN apk del --no-script --no-commit-hooks --no-cache --root /base-chroot bash-binsh
 
+# Try to remove perl package completely using apk del (may fail if it's a dependency)
+RUN apk del --no-script --no-commit-hooks --no-cache --root /base-chroot perl || true
+
+# Remove unneeded files from base-chroot to reduce image size
+# Conservative cleanup: only remove binaries/tools that are definitely not runtime dependencies
+# Note: Cannot remove codec libraries (aom, SvtAv1, rav1e, jxl, glycin) as ffmpeg/vips may depend on them
+RUN rm -rf /base-chroot/usr/share/doc/* \
+           /base-chroot/usr/share/man/* \
+           /base-chroot/usr/lib/*.a \
+           /base-chroot/usr/include/* \
+           /base-chroot/usr/lib/libgtk-4.* \
+           /base-chroot/usr/bin/gtk4-* \
+           /base-chroot/usr/bin/glycin-* \
+           /base-chroot/usr/share/gtk-4.0 \
+           /base-chroot/usr/lib/libSDL2* \
+           /base-chroot/usr/bin/rav1e \
+           /base-chroot/usr/bin/x264 \
+           /base-chroot/usr/share/glib-2.0 \
+           /base-chroot/usr/share/mime
+
 # Copy Mastodon sources for final layer
 COPY . /opt/mastodon/
 RUN \
@@ -242,8 +262,11 @@ COPY --from=precompiler /opt/mastodon/public/assets /opt/mastodon/public/assets
 COPY --from=bundler /usr/local/bundle/ /usr/local/bundle/
 COPY --from=bundler /opt/mastodon/.bundle/config /opt/mastodon/.bundle/config
 
-RUN bundle exec bootsnap precompile --gemfile app/ lib/
 RUN ldconfig
+
+# Precompile bootsnap code for faster Rails startup
+RUN bundle exec bootsnap precompile --gemfile app/ lib/
+
 
 
 FROM ruby-prod AS mastodon

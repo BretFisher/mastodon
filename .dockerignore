@@ -28,3 +28,10 @@ storybook-static
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+tmp/
+spec/
+.devcontainer/
+.husky/
+.rubocop/
+.storybook/
+docs/
