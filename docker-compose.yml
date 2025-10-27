@@ -26,7 +26,7 @@ services:
   # Bootstrap service for generating secrets (doesn't need .env.secrets)
   bootstrap:
     build: .
-    image: ericsmalling/mastodon:latest
+    image: ghcr.io/bretfisher/mastodon:pr-10
     env_file:
       - .env
     # Note: no .env.secrets here since we're using this to generate that file
@@ -40,17 +40,19 @@ services:
     # You can uncomment the following line if you want to not use the prebuilt image, for example if you have local code changes
     # build: .
     # image: ghcr.io/mastodon/mastodon:v4.4.4
-    image: ericsmalling/mastodon:latest
+    image: ghcr.io/bretfisher/mastodon:pr-10
     env_file:
       - .env
       - .env.secrets
     command: bundle exec puma -C config/puma.rb
     healthcheck:
       # prettier-ignore
-      test: [
-              "CMD-SHELL",
-              "curl -s --noproxy localhost localhost:3000/health | grep -q 'OK' || exit 1"
-            ]
+      # TODO: fix health check with chainguard images
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --noproxy localhost localhost:3000/health | grep -q 'OK' || exit 1",
+        ]
     ports:
       - "3000:3000"
     depends_on:
@@ -136,6 +138,7 @@ services:
     env_file: .env
     command: node ./streaming/index.js
     healthcheck:
+      # TODO: fix health check with chainguard images
       # prettier-ignore
       test: ['CMD-SHELL', "curl -s --noproxy localhost localhost:4000/api/v1/streaming/health | grep -q 'OK' || exit 1"]
     ports:
@@ -147,7 +150,7 @@ services:
   sidekiq:
     # You can uncomment the following line if you want to not use the prebuilt image, for example if you have local code changes
     build: .
-    image: ericsmalling/mastodon:latest
+    image: ghcr.io/bretfisher/mastodon:pr-10
     # image: ghcr.io/mastodon/mastodon:v4.4.4
     env_file:
       - .env
@@ -159,6 +162,7 @@ services:
     volumes:
       - ./public/system:/mastodon/public/system
     healthcheck:
+      # TODO: fix health check with chainguard images
       test: ["CMD-SHELL", "ps aux | grep '[s]idekiq\ 7' || false"]
 
   ## Uncomment to enable federation with tor instances along with adding the following ENV variables

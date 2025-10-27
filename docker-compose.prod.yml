@@ -1,6 +1,20 @@
 # This is an OVERRIDE compose file for production deployment
 # run with: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
+services:
+  proxy:
+    restart: always
+  web:
+    restart: always
+  db:
+    restart: always
+  redis:
+    restart: always
+  streaming:
+    restart: always
+  sidekiq:
+    restart: always
+
 configs:
   caddyfile:
     content: |
