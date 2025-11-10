@@ -3,7 +3,7 @@ name: Docker Builds
 on:
   push:
     branches:
-      - main
+      - chainguard
     # don't rebuild image if someone only edited unrelated files
     paths-ignore:
       - "README.md"
