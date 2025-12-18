@@ -5,7 +5,7 @@ ruby '>= 3.2.0', '< 3.5.0'
 
 gem 'propshaft'
 gem 'puma', '~> 7.0'
-gem 'rails', '~> 8.0'
+gem 'rails', '~> 8.1'
 gem 'thor', '~> 1.2'
 
 gem 'dotenv'
@@ -13,8 +13,8 @@ gem 'haml-rails', '~>3.0'
 gem 'pg', '~> 1.5'
 gem 'pghero'
 
-gem 'aws-sdk-core', '< 3.216.0', require: false # TODO: https://github.com/mastodon/mastodon/pull/34173#issuecomment-2733378873
-gem 'aws-sdk-s3', '~> 1.123', require: false
+gem 'aws-sdk-core', '< 3.241.0', require: false # TODO: https://github.com/mastodon/mastodon/pull/34173#issuecomment-2733378873
+gem 'aws-sdk-s3', '~> 1.208', require: false
 gem 'blurhash', '~> 0.1'
 gem 'fog-core', '<= 2.6.0'
 gem 'fog-openstack', '~> 1.0', require: false
