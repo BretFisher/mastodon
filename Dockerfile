@@ -3,7 +3,7 @@
 ARG TARGETPLATFORM=${TARGETPLATFORM}
 ARG BUILDPLATFORM=${BUILDPLATFORM}
 
-FROM cgr.dev/chainguard/ruby:latest@sha256:7775e6338a33ce18ee0dbd2d9508efa3cb6f53c86b52612160999a2e7c8b332e AS ruby-prod
+FROM cgr.dev/chainguard/ruby:latest@sha256:ccff72986864142cc39ff3072e2d3e2979acb2d317e5c2a002c0ed799f10d6b2 AS ruby-prod
 
 ARG MASTODON_VERSION_PRERELEASE=""
 ARG MASTODON_VERSION_METADATA=""
@@ -39,7 +39,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-o", "errexit", "-c"]
 
 ARG TARGETPLATFORM
 
-FROM cgr.dev/chainguard/ruby:latest-dev@sha256:5272c0d07efc85cafb5e0d710eccb321468d7b1071c7329dfae8416ee9ae5f79 AS ruby-dev
+FROM cgr.dev/chainguard/ruby:latest-dev@sha256:7af86f36966475292a5aeddccb23af1fc2b3c6d0e46ea16f35f86038688bf1ba AS ruby-dev
 USER root
 
 # Resulting version string is vX.X.X-MASTODON_VERSION_PRERELEASE+MASTODON_VERSION_METADATA
